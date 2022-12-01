@@ -1,0 +1,6 @@
+- targets:
+       - node-exporter:9100
+  labels:
+       cluster: cluster1
+       dc: dc1
+

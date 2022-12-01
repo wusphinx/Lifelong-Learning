@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.37.2
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - ./prometheus_data:/prometheus
+    command:
+      - '--web.enable-lifecycle'
+      - '--storage.tsdb.retention.time=36h'
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - 9090:9090
+    restart: always
+  alertmanager:
+    image: prom/alertmanager:v0.24.0
+    ports:
+      - 9093:9093
+    volumes:
+      - ./alertmanager/:/etc/alertmanager/
+    restart: always
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+  webhook:
+    image: timonwong/prometheus-webhook-dingtalk:v2.1.0
+    ports:
+      - 18060:8060
+    volumes:
+      - ./alertmanager/webhook.yml:/etc/prometheus-webhook-dingtalk/config.yml
+    command:
+      - '--web.listen-address=:8060'
+      - '--web.enable-ui'
+      - '--web.enable-lifecycle'
+      - '--log.level=info'
+      - '--config.file=/etc/prometheus-webhook-dingtalk/config.yml'
+    restart: always
+
+  node-exporter:
+    image: prom/node-exporter:v1.4.0
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - --collector.filesystem.ignored-mount-points
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+    ports:
+      - 9100:9100
+    restart: always

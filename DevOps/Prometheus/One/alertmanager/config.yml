@@ -1,0 +1,10 @@
+route:
+  receiver: 'default-receiver'
+  repeat_interval: 1m
+  group_interval: 1m
+  group_by: ['alertname', 'cluster']
+
+receivers:
+  - name: default-receiver
+    webhook_configs:
+    - url: http://webhook:8060/dingtalk/webhook1/send
