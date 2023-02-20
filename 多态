@@ -1,0 +1,68 @@
+多态是指，针对某个类型的方法调用，其真正执行的方法取决于**运行时期**实际类型的方法
+以下这个例子很容易理解，但却很好地阐述了何为多态
+反过来，如果没有多态，以下业务场景该如何设计呢？
+- 没有多态，就没法用`for`语句了
+- 这里列出的只是Income、Salary、StateCouncilSpecialAllowance对象，如果是100个对象，没有多太态会怎样？增加类型以及条件判断
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        // 给一个有普通收入、工资收入和享受国务院特殊津贴的小伙伴算税:
+        Income[] incomes = new Income[] {
+                new Income(3000),
+                new Salary(7500),
+                new StateCouncilSpecialAllowance(15000)
+        };
+        System.out.println(totalTax(incomes));
+    }
+
+    public static double totalTax(Income... incomes) {
+        double total = 0;
+        for (Income income: incomes) {
+            total = total + income.getTax();
+        }
+        return total;
+    }
+}
+
+class Income {
+    protected double income;
+
+    public Income(double income) {
+        this.income = income;
+    }
+
+    public double getTax() {
+        return income * 0.1; // 税率10%
+    }
+}
+
+class Salary extends Income {
+    public Salary(double income) {
+        super(income);
+    }
+
+    @Override
+    public double getTax() {
+        if (income <= 5000) {
+            return 0;
+        }
+        return (income - 5000) * 0.2;
+    }
+}
+
+class StateCouncilSpecialAllowance extends Income {
+    public StateCouncilSpecialAllowance(double income) {
+        super(income);
+    }
+
+    @Override
+    public double getTax() {
+        return 0;
+    }
+}
+```
+
+
+参考：
+- https://www.liaoxuefeng.com/wiki/1252599548343744/1260455778791232
