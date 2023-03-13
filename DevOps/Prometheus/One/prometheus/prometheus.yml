@@ -9,8 +9,8 @@ rule_files:
   - /etc/prometheus/rules/*.rules
   
 global:
-  scrape_interval:     15s # By default, scrape targets every 15 seconds.
-  evaluation_interval: 15s # By default, scrape targets every 15 seconds.
+  scrape_interval:     5s # By default, scrape targets every 15 seconds.
+  evaluation_interval: 5s # By default, scrape targets every 15 seconds.
   # scrape_timeout is set to the global default (10s).
 
 # Load and evaluate rules in this file every 'evaluation_interval' seconds.
@@ -25,3 +25,18 @@ scrape_configs:
     file_sd_configs:
     - files:
       - /etc/prometheus/host.yml
+    relabel_configs:
+    - action: labelmap
+    # __scrape_interval__="15s" => interval
+    # __scrape_timeout__="10s" => timeout
+      regex: __scrape_(.*)__
+      replacement: $1
+    # TODO  relabel配置的各种用法
+    # start replace cluster with icluster
+    - source_labels: [cluster]
+      regex: (.*)
+      target_label: icluster
+      replacement: $1
+      action: replace
+    - regex: cluster.*
+      action: labeldrop
