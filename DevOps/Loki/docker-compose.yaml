@@ -5,6 +5,16 @@ networks:
 
 
 services:
+  fluentbit:
+    image: fluent/fluent-bit:2.1.2
+    container_name: fluentbit
+    command: /fluent-bit/bin/fluent-bit -i node_exporter_metrics -p path.procfs=/host/proc -p path.sysfs=/host/sys -o prometheus_exporter -p "add_label=host fluentbit" -f 1
+    ports:
+      - 2021:2021
+    volumes:
+      - /proc:/host/proc
+      - /sys:/host/sys
+
   one:
     ports:
       - "8080:8080"
