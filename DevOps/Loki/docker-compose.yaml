@@ -8,18 +8,32 @@ services:
   fluentbit:
     image: fluent/fluent-bit:2.1.2
     container_name: fluentbit
-    command: /fluent-bit/bin/fluent-bit -i node_exporter_metrics -p path.procfs=/host/proc -p path.sysfs=/host/sys -o prometheus_exporter -p "add_label=host fluentbit" -f 1
+    command: /fluent-bit/bin/fluent-bit -c /fluent-bit/etc/fluent-bit.conf
     ports:
       - 2021:2021
+      - "24224:24224"
     volumes:
       - /proc:/host/proc
       - /sys:/host/sys
+      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./logs:/var/logs
 
-  one:
+  nginx:
+    image: nginx:latest
     ports:
-      - "8080:8080"
-    build:
-      context: ./one
+      - "18080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./logs:/var/log/nginx
+    restart: always
+    # one:
+    #   ports:
+    #     - "8080:8080"
+    #   build:
+    #     context: ./one
+    # volumes:
+    #   - ./logs:/logs
   loki:
     image: grafana/loki:2.8.0
     volumes:
@@ -30,20 +44,19 @@ services:
     command: -config.file=/etc/loki/local-config.yaml
     environment:
       DOCKER_HOST: /var/run/docker.sock
-    networks:
-      - loki
-
-  promtail:
-    image: grafana/promtail:2.8.0
-    volumes:
-      - /var/log:/var/log #- /Users/qunlinwu/.colima/default/docker.sock:/var/run/docker.sock
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./promtail-config.yml:/etc/promtail/config.yml
-    command: -config.file=/etc/promtail/config.yml
-    environment:
-      DOCKER_HOST: /Users/qunlinwu/.colima/default/docker.sock
-    networks:
-      - loki
+    # networks:
+    #   - loki
+    # promtail:
+    #   image: grafana/promtail:2.8.0
+    #   volumes:
+    #     - /var/log:/var/log #- /Users/qunlinwu/.colima/default/docker.sock:/var/run/docker.sock
+    #     - /var/run/docker.sock:/var/run/docker.sock
+    #     - ./promtail-config.yml:/etc/promtail/config.yml
+    #   command: -config.file=/etc/promtail/config.yml
+    #   environment:
+    #     DOCKER_HOST: /Users/qunlinwu/.colima/default/docker.sock
+    #   networks:
+    #     - loki
 
   grafana:
     environment:
@@ -72,5 +85,3 @@ services:
     image: grafana/grafana:latest
     ports:
       - "3000:3000"
-    networks:
-      - loki

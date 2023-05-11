@@ -1,3 +1,4 @@
 .terraform*
 terraform.tfstate*
 DevOps/Prometheus/One/prometheus_data
+logs/
