@@ -5,12 +5,16 @@ alerting:
     - targets:
       - "alertmanager:9093"
 
+storage:
+  tsdb:
+    out_of_order_time_window: 1h
+
 rule_files:
   - /etc/prometheus/rules/*.rules
   
 global:
-  scrape_interval:     5s # By default, scrape targets every 15 seconds.
-  evaluation_interval: 5s # By default, scrape targets every 15 seconds.
+  scrape_interval:     15s # By default, scrape targets every 15 seconds.
+  evaluation_interval: 15s # By default, scrape targets every 15 seconds.
   # scrape_timeout is set to the global default (10s).
 
 # Load and evaluate rules in this file every 'evaluation_interval' seconds.
