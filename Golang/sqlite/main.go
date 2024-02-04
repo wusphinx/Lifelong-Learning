@@ -19,6 +19,11 @@ type User struct {
 }
 
 func main() {
+	start := time.Now()
+	defer func() {
+		fmt.Printf("latency: %.2fs", time.Now().Sub(start).Seconds())
+	}()
+
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
